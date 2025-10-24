@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>حاسبة معاش التقاعد للمعلمين</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+    <style>
+      body {
+        font-family: "Cairo", sans-serif;
+      }
+      .form-select,
+      .form-input {
+        background-color: #f8fafc;
+        border-color: #e2e8f0;
+        transition: all 0.2s ease-in-out;
+      }
+      .form-select:focus,
+      .form-input:focus {
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+        border-color: #3b82f6;
+        outline: none;
+      }
+      .result-card {
+        border-right: 4px solid #3b82f6;
+      }
+      /* ::: تأثير خط النيون البنفسجي الموف الجديد ::: */
+      .neon-text {
+        color: #fff; /* لون الخط الأساسي */
+        text-shadow:
+          0 0 7px #ff00ff,
+          0 0 10px #ff00ff,
+          0 0 21px #ff00ff,
+          0 0 42px #8a2be2, /* درجات مختلفة لزيادة العمق */
+          0 0 82px #8a2be2,
+          0 0 92px #8a2be2,
+          0 0 102px #ff00ff,
+          0 0 151px #ff00ff;
+        animation: flicker 1.5s infinite alternate; /* إضافة وميض خفيف */
+      }
+
+      /* تعديل الوميض ليتناسب مع اللون البنفسجي */
+      @keyframes flicker {
+        0%,
+        18%,
+        22%,
+        25%,
+        53%,
+        57%,
+        100% {
+          text-shadow:
+            0 0 4px #ff00ff,
+            0 0 11px #ff00ff,
+            0 0 19px #ff00ff,
+            0 0 40px #8a2be2,
+            0 0 80px #8a2be2;
+        }
+
+        20%,
+        24%,
+        55% {
+          text-shadow: none;
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="w-full max-w-2xl mx-auto p-4 sm:p-6 md:p-8">
+      <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+        <div class="p-8">
+          <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">
+              <span class="neon-text">حاسبة تقاعد المعلمين والمعلمات</span>
+            </h1>
+            <p class="text-gray-500 mt-2">
+              ادخل تاريخ المباشرة في الوزارة ومن ثم التاريخ المتوقع للتقاعد
+              ولاتنس باقي البيانات الشخصية
+            </p>
+          </div>
+          <form id="retirement-form" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1"
+                  >تاريخ بداية الخدمة المعتمد (هجري)</label
+                >
+                <div class="grid grid-cols-3 gap-2">
+                  <select
+                    id="start-day"
+                    class="form-select w-full px-2 py-2 rounded-lg border text-center"
+                  ></select>
+                  <select
+                    id="start-month"
+                    class="form-select w-full px-2 py-2 rounded-lg border text-center"
+                  ></select>
+                  <select
+                    id="start-year"
+                    class="form-select w-full px-2 py-2 rounded-lg border text-center"
+                  ></select>
+                </div>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1"
+                  >تاريخ التقاعد المتوقع (هجري)</label
+                >
+                <div class="grid grid-cols-3 gap-2">
+                  <select
+                    id="end-day"
+                    class="form-select w-full px-2 py-2 rounded-lg border text-center"
+                  ></select>
+                  <select
+                    id="end-month"
+                    class="form-select w-full px-2 py-2 rounded-lg border text-center"
+                  ></select>
+                  <select
+                    id="end-year"
+                    class="form-select w-full px-2 py-2 rounded-lg border text-center"
+                  ></select>
+                </div>
+              </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label
+                  for="rank"
+                  class="block text-sm font-medium text-gray-700 mb-1"
+                  >الرتبة الحالية</label
+                >
+                <select
+                  id="rank"
+                  class="form-select w-full px-4 py-2 rounded-lg border focus:ring-blue-500"
+                >
+                  <option value="ممارس">معلم ممارس</option>
+                  <option value="متقدم">معلم متقدم</option>
+                  <option value="خبير">معلم خبير</option>
+                </select>
+              </div>
+              <div>
+                <label
+                  for="net-salary"
+                  class="block text-sm font-medium text-gray-700 mb-1"
+                  >الراتب الصافي الحالي</label
+                >
+                <select
+                  id="net-salary"
+                  class="form-select w-full px-4 py-2 rounded-lg border focus:ring-blue-500"
+                >
+                  </select>
+              </div>
+            </div>
+            <div>
+              <button
+                type="submit"
+                class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-transform transform hover:scale-105"
+              >
+                احسب
+              </button>
+            </div>
+          </form>
+          <div
+            id="result"
+            class="hidden mt-8 p-6 bg-gray-50 rounded-lg result-card"
+          >
+            <h2 class="text-xl font-bold text-gray-800 mb-4">النتائج</h2>
+            <div class="space-y-3">
+              <div class="flex justify-between items-center">
+                <span class="font-medium text-gray-600">مدة الخدمة:</span>
+                <span
+                  id="service-duration"
+                  class="font-bold text-lg text-red-600"
+                ></span>
+              </div>
+              <hr />
+              <div class="flex justify-between items-center">
+                <span class="font-medium text-gray-600"
+                  >المعاش التقاعدي الشهري المتوقع:</span
+                >
+                <span
+                  id="pension-amount"
+                  class="font-bold text-2xl text-blue-600"
+                ></span>
+              </div>
+            </div>
+          </div>
+          <div
+            id="error-message"
+            class="hidden mt-4 p-4 bg-red-100 border-r-4 border-red-500 text-red-700 rounded-lg"
+          ></div>
+        </div>
+      </div>
+      <div class="text-center mt-6">
+        <p>لمشاركة الحاسبة على الواتساب</p>
+        <a
+          href="https://wa.me/?text=جرب%20حاسبة%20معاش%20التقاعد%20للمعلمين%20والمعلمات%20على%20موقع%20الشواهد:%20https://date.alshawahed.com/"
+          target="_blank"
+        >
+          <i
+            class="fab fa-whatsapp text-green-500 text-3xl hover:text-green-600"
+          ></i>
+        </a>
+      </div>
+
+      <footer class="text-center mt-6 text-gray-500 text-sm">
+        <p>مطور الصفحة الاستاذ فاضل المبارك</p>
+        <p>
+          <a
+            href="https://x.com/Fnar9595"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-blue-600 hover:text-blue-800"
+            >تابعني على تويتر</a
+          >
+        </p>
+      </footer>
+      </div>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Data for salaries based on the provided image
+        const salaryData = {
+          ممارس: [
+            { basic: 7570, net: 7588.7 },
+            { basic: 8070, net: 8043.7 },
+            { basic: 8570, net: 8498.7 },
+            { basic: 9070, net: 8953.7 },
+            { basic: 9570, net: 9408.7 },
+            { basic: 10070, net: 9863.7 },
+            { basic: 10570, net: 10318.7 },
+            { basic: 11090, net: 10791.9 },
+            { basic: 11610, net: 11265.1 },
+            { basic: 12130, net: 11738.3 },
+            { basic: 12650, net: 12211.5 },
+            { basic: 13170, net: 12684.7 },
+            { basic: 13690, net: 13157.9 },
+            { basic: 14230, net: 13649.3 },
+            { basic: 14770, net: 14140.7 },
+            { basic: 15310, net: 14632.1 },
+            { basic: 15850, net: 15123.5 },
+            { basic: 16390, net: 15614.9 },
+            { basic: 16930, net: 16106.3 },
+            { basic: 17470, net: 16597.7 },
+            { basic: 18010, net: 17089.1 },
+            { basic: 18550, net: 17580.5 },
+            { basic: 19090, net: 18071.9 },
+            { basic: 19630, net: 18563.3 },
+            { basic: 20170, net: 19054.7 },
+            { basic: 20710, net: 19546.1 },
+            { basic: 21250, net: 20037.5 },
+          ],
+          متقدم: [
+            { basic: 9950, net: 9754.5 },
+            { basic: 10490, net: 10245.9 },
+            { basic: 11030, net: 10737.3 },
+            { basic: 11570, net: 11228.7 },
+            { basic: 12110, net: 11720.1 },
+            { basic: 12650, net: 12211.5 },
+            { basic: 13190, net: 12702.9 },
+            { basic: 13750, net: 13212.5 },
+            { basic: 14310, net: 13722.1 },
+            { basic: 14870, net: 14231.7 },
+            { basic: 15430, net: 14741.3 },
+            { basic: 15990, net: 15250.9 },
+            { basic: 16550, net: 15760.5 },
+            { basic: 17130, net: 16288.3 },
+            { basic: 17710, net: 16816.1 },
+            { basic: 18290, net: 17343.9 },
+            { basic: 18870, net: 17871.7 },
+            { basic: 19450, net: 18399.5 },
+            { basic: 20030, net: 19127.3 },
+            { basic: 20610, net: 19655.1 },
+            { basic: 21190, net: 20182.9 },
+            { basic: 21770, net: 20710.7 },
+          ],
+          خبير: [
+            { basic: 12650, net: 12211.5 },
+            { basic: 13250, net: 12757.5 },
+            { basic: 13850, net: 13303.5 },
+            { basic: 14450, net: 13849.5 },
+            { basic: 15050, net: 14395.5 },
+            { basic: 15650, net: 14941.5 },
+            { basic: 16250, net: 15687.5 },
+            { basic: 16870, net: 16251.7 },
+            { basic: 17490, net: 16815.9 },
+            { basic: 18110, net: 17380.1 },
+            { basic: 18730, net: 17944.3 },
+            { basic: 19350, net: 18508.5 },
+            { basic: 19970, net: 19072.7 },
+            { basic: 20610, net: 19655.1 },
+            { basic: 21250, net: 20237.5 },
+            { basic: 21890, net: 20819.9 },
+            { basic: 22530, net: 21402.3 },
+            { basic: 23170, net: 21984.7 },
+            { basic: 23170, net: 22624.7 },
+            { basic: 23170, net: 23264.7 },
+            { basic: 23170, net: 23904.7 },
+          ],
+        };
+        const hijriMonths = [
+          "محرم",
+          "صفر",
+          "ربيع الأول",
+          "ربيع الثاني",
+          "جمادى الأولى",
+          "جمادى الآخرة",
+          "رجب",
+          "شعبان",
+          "رمضان",
+          "شوال",
+          "ذو القعدة",
+          "ذو الحجة",
+        ];
+        const rankSelect = document.getElementById("rank");
+        const netSalarySelect = document.getElementById("net-salary");
+        const form = document.getElementById("retirement-form");
+        const resultDiv = document.getElementById("result");
+        const errorDiv = document.getElementById("error-message");
+        const startDaySelect = document.getElementById("start-day");
+        const startMonthSelect = document.getElementById("start-month");
+        const startYearSelect = document.getElementById("start-year");
+        const endDaySelect = document.getElementById("end-day");
+        const endMonthSelect = document.getElementById("end-month");
+        const endYearSelect = document.getElementById("end-year");
+        function populateDays(selectElement) {
+          for (let i = 1; i <= 30; i++) {
+            const option = document.createElement("option");
+            option.value = i;
+            option.textContent = i;
+            selectElement.appendChild(option);
+          }
+        }
+        function populateMonths(selectElement) {
+          hijriMonths.forEach((month, index) => {
+            const option = document.createElement("option");
+            option.value = index + 1;
+            option.textContent = month;
+            selectElement.appendChild(option);
+          });
+        }
+        function populateYears(selectElement, isEndYear = false) {
+          selectElement.innerHTML = ""; // Clear previous options
+          const startYear = isEndYear ? 1447 : 1407; // Start from 1447 for end-year, 1407 for start-year
+          const endYear = 1475;
+          for (let i = startYear; i <= endYear; i++) {
+            const option = document.createElement("option");
+            option.value = i;
+            option.textContent = i;
+            selectElement.appendChild(option);
+          }
+        }
+        // Populate all date dropdowns
+        populateDays(startDaySelect);
+        populateMonths(startMonthSelect);
+        populateYears(startYearSelect, false);
+        populateDays(endDaySelect);
+        populateMonths(endMonthSelect);
+        populateYears(endYearSelect, true);
+        // Set some default values
+        startYearSelect.value = 1420;
+        endYearSelect.value = 1447;
+        // Update end-year dropdown when start-year changes
+        startYearSelect.addEventListener("change", function () {
+          populateYears(endYearSelect, true);
+          // Ensure end-year is not before start-year
+          if (parseInt(endYearSelect.value) < parseInt(startYearSelect.value)) {
+            endYearSelect.value = Math.max(
+              parseInt(startYearSelect.value) + 1,
+              1447
+            );
+          }
+        });
+        function populateSalaries() {
+          const selectedRank = rankSelect.value;
+          const salaries = salaryData[selectedRank];
+          netSalarySelect.innerHTML = "";
+          salaries.forEach((salary) => {
+            const option = document.createElement("option");
+            option.value = salary.basic;
+            option.textContent = salary.net.toFixed(2);
+            netSalarySelect.appendChild(option);
+          });
+        }
+        function calculateHijriDuration(startDateStr, endDateStr) {
+          const [y1, m1, d1] = startDateStr.split("-").map(Number);
+          const [y2, m2, d2] = endDateStr.split("-").map(Number);
+          if (
+            y2 < y1 ||
+            (y2 === y1 && m2 < m1) ||
+            (y2 === y1 && m2 === m1 && d2 < d1)
+          ) {
+            return {
+              error: "تاريخ التقاعد يجب أن يكون بعد تاريخ بداية الخدمة.",
+            };
+          }
+          let day_diff = d2 - d1;
+          let month_diff = m2 - m1;
+          let year_diff = y2 - y1;
+          if (day_diff < 0) {
+            month_diff--;
+            day_diff += 30;
+          }
+          if (month_diff < 0) {
+            year_diff--;
+            month_diff += 12;
+          }
+          let totalMonths = year_diff * 12 + month_diff;
+          let final_day_diff = day_diff;
+          if (day_diff >= 28) {
+            totalMonths++;
+            final_day_diff = 0;
+          }
+          const finalYears = Math.floor(totalMonths / 12);
+          const finalMonths = totalMonths % 12;
+          return {
+            totalMonths: totalMonths,
+            years: finalYears,
+            months: finalMonths,
+            days: final_day_diff,
+            error: null,
+          };
+        }
+        form.addEventListener("submit", function (e) {
+          e.preventDefault();
+          resultDiv.classList.add("hidden");
+          errorDiv.classList.add("hidden");
+          errorDiv.textContent = "";
+          const startDate = `${startYearSelect.value}-${startMonthSelect.value}-${startDaySelect.value}`;
+          const endDate = `${endYearSelect.value}-${endMonthSelect.value}-${endDaySelect.value}`;
+          const basicSalary = parseFloat(netSalarySelect.value);
+          if (!basicSalary) {
+            showError("الرجاء تعبئة جميع الحقول.");
+            return;
+          }
+          const duration = calculateHijriDuration(startDate, endDate);
+          if (duration.error) {
+            showError(duration.error);
+            return;
+          }
+          const pension = (basicSalary * duration.totalMonths) / 480;
+          document.getElementById(
+            "service-duration"
+          ).textContent = `${duration.years} سنوات و ${duration.months} أشهر و ${duration.days} أيام`;
+          document.getElementById(
+            "pension-amount"
+          ).textContent = `${pension.toLocaleString("ar-SA", {
+            style: "currency",
+            currency: "SAR",
+          })}`;
+          resultDiv.classList.remove("hidden");
+        });
+        function showError(message) {
+          errorDiv.textContent = message;
+          errorDiv.classList.remove("hidden");
+        }
+        rankSelect.addEventListener("change", populateSalaries);
+        populateSalaries(); // Initial population
+      });
+    </script>
+  </body>
+</html>
